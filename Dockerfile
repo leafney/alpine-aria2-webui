@@ -1,6 +1,11 @@
 FROM alpine:latest
 MAINTAINER leafney "babycoolzx@126.com"
 
+ENV WEBUI_PORT 6801
+ENV RPC_LISTEN_PORT 6800
+ENV BT_LISTEN_PORT 51413
+ENV DHT_LISTEN_PORT 51415
+
 RUN apk add --no-cache aria2 busybox unzip supervisor \
 	&& echo "files = /etc/aria2/start.ini" >> /etc/supervisord.conf \
 	&& adduser -D aria2 \
@@ -34,6 +39,6 @@ RUN chown -R aria2:aria2 /home/aria2 \
 	&& chown -R aria2:aria2 /aria2down \
 	&& chown -R aria2:aria2 /etc/aria2
 
-EXPOSE 6800 6801
+EXPOSE $WEBUI_PORT $RPC_LISTEN_PORT $BT_LISTEN_PORT $DHT_LISTEN_PORT
 
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]
