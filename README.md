@@ -26,7 +26,7 @@ eg : `$ docker run ... -e "BT_LISTEN_PORT=5000" ...` and the aria2.conf must set
 #### run aria2 docker with nginx
 
 ```
-$ docker run --name aria2ui -p 127.0.0.1:6800:6800 -p 127.0.0.1:6801:6801 -p 51413:51413 -p 51415:51415 -d -v /boxvalume/aria2pan:/aria2down leafney/alpine-aria2-webui
+$ docker run --name aria2ui -p 127.0.0.1:6801:6801 -p 6800:6800 -p 51413:51413 -p 51415:51415 -d -v /boxvalume/aria2pan:/aria2down leafney/alpine-aria2-webui
 ```
 
 nginx config 
@@ -38,15 +38,6 @@ server {
 
         location / {
                 proxy_pass http://127.0.0.1:6801/;
-        }
-}
-
-server {
-        server_name yourdoman.com;
-        listen yourdoman.com:6800;
-
-        location / {
-                proxy_pass http://127.0.0.1:6800/;
         }
 }
 ```
