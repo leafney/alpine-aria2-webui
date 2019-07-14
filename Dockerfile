@@ -6,7 +6,7 @@ ENV RPC_LISTEN_PORT 6800
 ENV BT_LISTEN_PORT 51413
 ENV DHT_LISTEN_PORT 51415
 
-RUN apk add --no-cache aria2 busybox unzip supervisor \
+RUN apk add --no-cache aria2 busybox unzip supervisor busybox-extras \
 	&& echo "files = /etc/aria2/start.ini" >> /etc/supervisord.conf \
 	&& adduser -D aria2 \
 	&& mkdir -p /etc/aria2 \
@@ -15,11 +15,35 @@ RUN apk add --no-cache aria2 busybox unzip supervisor \
 	&& rm -rf /var/lib/apk/lists/*
 
 # gosu version
-ENV GOSU_VERSION 1.10
+ENV GOSU_VERSION 1.11
 
 # gosu install latest
-RUN aria2c https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-amd64 -o /usr/local/bin/gosu \
-	&& chmod +x /usr/local/bin/gosu
+RUN set -eux; \
+	\
+	apk add --no-cache --virtual .gosu-deps \
+		ca-certificates \
+		dpkg \
+		gnupg \
+	; \
+	\
+	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
+	wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"; \
+	wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"; \
+	\
+# verify the signature
+	export GNUPGHOME="$(mktemp -d)"; \
+#	gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
+#	gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
+#	command -v gpgconf && gpgconf --kill all || :; \
+	rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
+	\
+# clean up fetch dependencies
+	apk del --no-network .gosu-deps; \
+	\
+	chmod +x /usr/local/bin/gosu; \
+# verify that the binary works
+	gosu --version; \
+	gosu nobody true
 
 # webui-aria2
 RUN aria2c https://github.com/ziahamza/webui-aria2/archive/master.zip -o /home/aria2/master.zip \
@@ -42,3 +66,4 @@ RUN chown -R aria2:aria2 /home/aria2 \
 EXPOSE $WEBUI_PORT $RPC_LISTEN_PORT $BT_LISTEN_PORT $DHT_LISTEN_PORT
 
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]
+
