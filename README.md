@@ -16,7 +16,7 @@ $ docker build -t="leafney/alpine-aria2-webui" .
 #### run aria2 docker
 
 ```
-$ docker run --name aria2ui -p 6800:6800 -p 6801:6801 -p 51413:51413 -p 51415:51415 -d -v /boxvalume/aria2pan:/aria2down leafney/alpine-aria2-webui
+$ docker run --name aria2ui --restart always -p 6800:6800 -p 6801:6801 -p 51413:51413 -p 51415:51415 -d -v /boxvalume/aria2pan:/aria2down leafney/alpine-aria2-webui
 ```
 
 You can customize the parameters with `-e` whitch you set in the `aria2.conf` . 
