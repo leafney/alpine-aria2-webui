@@ -56,7 +56,7 @@ dir=/aria2down
 rpc-listen-port=6800
 listen-port=51413
 dht-listen-port=51415
-rpc-secret=leafney
+rpc-secret=aria2.secret
 
 continue=true
 
